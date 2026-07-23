@@ -39,7 +39,7 @@
 
 .hl-card:hover {
   transform: translateY(-2px);
-  box-shadow: 6px 6px 0 rgba(31, 42, 36, 0.12);
+  box-shadow: 0 4px 10px rgba(31, 42, 36, 0.08), 0 10px 24px rgba(31, 42, 36, 0.1);
   border-color: var(--ink);
 }
 
@@ -49,7 +49,7 @@
   appearance: none;
   width: 22px;
   height: 22px;
-  border: 2px solid var(--ink);
+  border: 1.5px solid var(--ink);
   border-radius: 3px;
   cursor: pointer;
   position: relative;
@@ -79,7 +79,7 @@
   appearance: none;
   width: 15px;
   height: 15px;
-  border: 1.5px solid var(--slate);
+  border: 1px solid var(--slate);
   border-radius: 3px;
   cursor: pointer;
   position: relative;
@@ -132,7 +132,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  border: 1.5px solid var(--hcolor, var(--slate));
+  border: 1px solid var(--hcolor, var(--slate));
   background: var(--paper);
   color: var(--hcolor, var(--ink));
   font-family: 'JetBrains Mono', monospace;
@@ -189,15 +189,15 @@
   letter-spacing: 0.03em;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
-  box-shadow: 3px 3px 0 var(--ink);
+  box-shadow: 0 2px 4px rgba(31, 42, 36, 0.18);
 }
 .hl-ai-btn:hover:not(:disabled) {
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 var(--ink);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(31, 42, 36, 0.22);
 }
 .hl-ai-btn:active:not(:disabled) {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 var(--ink);
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(31, 42, 36, 0.18);
 }
 .hl-ai-btn:disabled {
   opacity: 0.6;
