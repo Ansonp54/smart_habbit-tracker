@@ -53,5 +53,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
     plugins: [react(), insightsApiPlugin(env.ANTHROPIC_API_KEY)],
+    server: {
+      host: true, // listen on the LAN, not just localhost, so phones on the same WiFi can reach it
+    },
   }
 })

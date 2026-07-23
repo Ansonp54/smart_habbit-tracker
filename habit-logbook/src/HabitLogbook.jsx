@@ -355,8 +355,13 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
       <div className="hl-root">
         {/* Header / masthead */}
         <div style={styles.masthead}>
-          <div className="hl-mono" style={styles.eyebrow}>FIELD LOG — PERSONAL HABITS</div>
-          <h1 className="hl-mono" style={styles.title}>Smart Habit Tracker</h1>
+          <div className="hl-masthead-row">
+            <img src="/icon-192.png" alt="" className="hl-app-icon" />
+            <div>
+              <div className="hl-mono" style={styles.eyebrow}>FIELD LOG — PERSONAL HABITS</div>
+              <h1 className="hl-mono" style={styles.title}>Smart Habit Tracker</h1>
+            </div>
+          </div>
         </div>
 
         {/* Week selector */}
@@ -740,7 +745,7 @@ const styles = {
   },
   habitDot: { minWidth: 20, fontSize: 15, fontWeight: 700, textAlign: "center", flexShrink: 0 },
   habitLabel: { fontSize: 13, width: 70, color: "#1F2A24", fontWeight: 500 },
-  controlArea: { display: "flex", alignItems: "center", gap: 8, flex: 1 },
+  controlArea: { display: "flex", alignItems: "center", gap: 8, flex: 1, flexWrap: "wrap" },
   controlText: { fontSize: 12, color: "#8B9184" },
   workoutTypeGroup: {
     display: "flex",
