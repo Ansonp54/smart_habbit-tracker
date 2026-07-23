@@ -18,16 +18,32 @@ import "./HabitLogbook.css";
 
 // ---------- helpers ----------
 const HABITS = [
-  { key: "gym", label: "Gym", unit: "session", type: "bool", color: "#2F6D4F" },
-  { key: "water", label: "Water", unit: "bottles", type: "count", target: 1, step: 0.25, color: "#3E7CB1" },
-  { key: "sleep", label: "Sleep", unit: "hrs", type: "count", target: 8, step: 0.5, color: "#7C5CBF" },
-  { key: "reading", label: "Reading", unit: "min", type: "count", target: 30, step: 5, color: "#C98A2B" },
-  { key: "coding", label: "Coding", unit: "min", type: "count", target: 60, step: 5, color: "#B24C33" },
-  { key: "deliveries", label: "Deliveries", unit: "$", type: "count", target: 50, step: 1, color: "#5C7A99", goal: "max" },
-  { key: "jobApps", label: "Job Apps", unit: "applications", type: "count", target: 5, step: 1, color: "#2E8B8B" },
-  { key: "creatine", label: "Creatine", unit: "dose", type: "bool", color: "#9C6B30" },
-  { key: "proteinShake", label: "Protein Shake", unit: "shake", type: "bool", color: "#C2577D" },
+  { key: "gym", label: "Gym", unit: "session", type: "bool", color: "#2F6D4F", page: "gym" },
+  { key: "water", label: "Water", unit: "bottles", type: "count", target: 1, step: 0.25, color: "#3E7CB1", page: "today" },
+  { key: "sleep", label: "Sleep", unit: "hrs", type: "count", target: 8, step: 0.5, color: "#7C5CBF", page: "today" },
+  { key: "reading", label: "Reading", unit: "min", type: "count", target: 30, step: 5, color: "#C98A2B", page: "today" },
+  { key: "coding", label: "Coding", unit: "min", type: "count", target: 60, step: 5, color: "#B24C33", page: "today" },
+  { key: "deliveries", label: "Deliveries", unit: "$", type: "count", target: 50, step: 1, color: "#5C7A99", goal: "max", page: "expenses" },
+  { key: "jobApps", label: "Job Apps", unit: "applications", type: "count", target: 5, step: 1, color: "#2E8B8B", page: "today" },
+  { key: "creatine", label: "Creatine", unit: "dose", type: "bool", color: "#9C6B30", page: "today" },
+  { key: "proteinShake", label: "Protein Shake", unit: "shake", type: "bool", color: "#C2577D", page: "today" },
 ];
+
+const PAGES = [
+  { key: "today", label: "Today" },
+  { key: "gym", label: "Gym" },
+  { key: "meals", label: "Meals" },
+  { key: "expenses", label: "Expenses" },
+];
+
+const MEAL_SLOTS = [
+  { key: "mealBreakfast", label: "Breakfast" },
+  { key: "mealLunch", label: "Lunch" },
+  { key: "mealDinner", label: "Dinner" },
+  { key: "mealSnacks", label: "Snacks" },
+];
+
+const MEAL_RATINGS = ["Great", "Good", "Okay", "Poor"];
 
 const STORAGE_KEY = "habit-log-entries";
 const INSIGHTS_STORAGE_KEY = "habit-log-insights";
@@ -101,6 +117,11 @@ function emptyEntry(date) {
     jobApps: 0,
     creatine: false,
     proteinShake: false,
+    mealBreakfast: "",
+    mealLunch: "",
+    mealDinner: "",
+    mealSnacks: "",
+    mealRating: "",
   };
 }
 
@@ -142,6 +163,7 @@ export default function HabitLogbook() {
   const importInputRef = useRef(null);
   const [chartType, setChartType] = useState("line"); // line | bar
   const [hitRateHabitKey, setHitRateHabitKey] = useState(HABITS[0].key);
+  const [page, setPage] = useState("today"); // today | gym | meals | expenses
 
   const entry = log[selectedDate] || emptyEntry(selectedDate);
 
@@ -349,6 +371,8 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
   };
 
   const isToday = selectedDate === todayKey();
+  const pageHabits = HABITS.filter((h) => h.page === page);
+  const pageLabel = PAGES.find((p) => p.key === page)?.label || "Entry";
 
   return (
     <div style={styles.page}>
@@ -359,7 +383,7 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
             <img src="/icon-192.png" alt="" className="hl-app-icon" />
             <div>
               <div className="hl-mono" style={styles.eyebrow}>FIELD LOG — PERSONAL HABITS</div>
-              <h1 className="hl-mono" style={styles.title}>Smart Habit Tracker</h1>
+              <h1 className="hl-mono hl-title-anim" style={styles.title}>Smart Habit Tracker</h1>
             </div>
           </div>
         </div>
@@ -395,7 +419,7 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
         <div className="hl-card" style={styles.card}>
           <div style={styles.cardHeaderRow}>
             <div className="hl-mono" style={styles.cardHeader}>
-              Entry — {fmtDay(selectedDate)} {isToday ? "(today)" : ""}
+              {pageLabel} — {fmtDay(selectedDate)} {isToday ? "(today)" : ""}
             </div>
             <div style={styles.saveGroup}>
               <div className="hl-mono" style={styles.saveIndicator}>
@@ -407,7 +431,40 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
             </div>
           </div>
 
-          {HABITS.map((h) => (
+          {page === "meals" ? (
+            <>
+              {MEAL_SLOTS.map((slot) => (
+                <div key={slot.key} className="hl-habit-row" style={styles.mealRow}>
+                  <div className="hl-mono" style={styles.mealLabel}>{slot.label}</div>
+                  <input
+                    type="text"
+                    className="hl-mono hl-meal-input"
+                    placeholder="what did you eat?"
+                    value={entry[slot.key] || ""}
+                    onChange={(ev) => updateEntry({ [slot.key]: ev.target.value })}
+                  />
+                </div>
+              ))}
+              <div className="hl-habit-row" style={styles.mealRow}>
+                <div className="hl-mono" style={styles.mealLabel}>Day rating</div>
+                <select
+                  className="hl-mono"
+                  style={styles.weekSelect}
+                  value={entry.mealRating || ""}
+                  onChange={(ev) => updateEntry({ mealRating: ev.target.value })}
+                >
+                  <option value="">—</option>
+                  {MEAL_RATINGS.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="hl-mono" style={styles.emptyState}>
+                Photo and voice logging are coming later — for now just type what you ate.
+              </div>
+            </>
+          ) : (
+            pageHabits.map((h) => (
             <div key={h.key} className="hl-habit-row" style={styles.habitRow}>
               <div className="hl-mono" style={{ ...styles.habitDot, color: h.color }} title={`${streaks[h.key]}-day streak`}>
                 {streaks[h.key]}
@@ -488,9 +545,12 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
                 </div>
               )}
             </div>
-          ))}
+            ))
+          )}
         </div>
 
+        {page === "today" && (
+        <>
         {/* Trend chart */}
         <div className="hl-card" style={styles.card}>
           <div style={styles.cardHeaderRow}>
@@ -625,6 +685,8 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
             </div>
           )}
         </div>
+        </>
+        )}
 
         <div className="hl-mono" style={styles.footer}>
           data stored privately on this device — {Object.keys(log).length} days logged
@@ -652,6 +714,18 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
           )}
         </div>
       </div>
+
+      <nav className="hl-tabbar hl-mono">
+        {PAGES.map((p) => (
+          <button
+            key={p.key}
+            className={`hl-tab ${page === p.key ? "active" : ""}`}
+            onClick={() => setPage(p.key)}
+          >
+            {p.label}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
@@ -660,7 +734,7 @@ const styles = {
   page: {
     minHeight: "100%",
     background: "#E9E9E6",
-    padding: "20px 16px 40px",
+    padding: "20px 16px 90px",
   },
   masthead: {
     borderBottom: "1.5px solid #1F2A24",
@@ -762,6 +836,14 @@ const styles = {
     cursor: "pointer",
     whiteSpace: "nowrap",
   },
+  mealRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "10px 0",
+    borderTop: "1px dashed #D8DBCF",
+  },
+  mealLabel: { fontSize: 13, width: 90, color: "#1F2A24", fontWeight: 500, flexShrink: 0 },
   controlValue: { fontSize: 14, fontWeight: 700, color: "#1F2A24", minWidth: 70, display: "flex", alignItems: "center" },
   controlValueInput: {
     width: 44,
