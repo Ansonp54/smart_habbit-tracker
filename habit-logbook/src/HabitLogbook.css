@@ -1,0 +1,251 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+.hl-root {
+  --ink: #1F2A24;
+  --paper: #EEF0E6;
+  --moss: #2F6D4F;
+  --amber: #C98A2B;
+  --rust: #B24C33;
+  --slate: #8B9184;
+  font-family: 'Inter', sans-serif;
+  animation: hl-fade-in 0.45s ease both;
+}
+
+.hl-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+@keyframes hl-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hl-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- cards ---------- */
+
+.hl-card {
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  animation: hl-fade-in 0.5s ease both;
+}
+
+.hl-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0 rgba(31, 42, 36, 0.12);
+  border-color: var(--ink);
+}
+
+/* ---------- checkboxes ---------- */
+
+.hl-checkbox {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  background: transparent;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.hl-checkbox:hover {
+  border-color: var(--moss);
+}
+.hl-checkbox:checked {
+  background: var(--moss);
+  border-color: var(--moss);
+  animation: hl-pop 0.28s ease;
+}
+.hl-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -3px;
+  left: 3px;
+  color: var(--paper);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hl-checkbox-sm {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid var(--slate);
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  background: var(--paper);
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.hl-checkbox-sm:hover {
+  border-color: var(--moss);
+}
+.hl-checkbox-sm:checked {
+  background: var(--moss);
+  border-color: var(--moss);
+  animation: hl-pop 0.28s ease;
+}
+.hl-checkbox-sm:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -3px;
+  left: 1px;
+  color: var(--paper);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ---------- number input ---------- */
+
+.hl-num-input::-webkit-outer-spin-button,
+.hl-num-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.hl-num-input {
+  -moz-appearance: textfield;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.hl-num-input:focus {
+  outline: none;
+  border-color: var(--hcolor, var(--slate));
+  background: var(--paper);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hcolor, var(--slate)) 22%, transparent);
+}
+.hl-num-input:hover {
+  border-color: var(--hcolor, var(--slate));
+}
+
+/* ---------- buttons ---------- */
+
+.hl-stepper-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hcolor, var(--slate));
+  background: var(--paper);
+  color: var(--hcolor, var(--ink));
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+.hl-stepper-btn:hover {
+  background: var(--hcolor, var(--ink));
+  color: var(--paper);
+  border-color: var(--hcolor, var(--ink));
+  transform: translateY(-1px);
+}
+.hl-stepper-btn:active {
+  transform: translateY(0) scale(0.92);
+}
+
+.hl-day-pill {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--slate);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.hl-day-pill:hover {
+  background: rgba(31, 42, 36, 0.08);
+  color: var(--ink);
+}
+.hl-day-pill.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.hl-day-pill.active:hover {
+  background: var(--ink);
+}
+
+.hl-ai-btn {
+  background: var(--amber);
+  color: var(--ink);
+  border: none;
+  padding: 12px 22px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.hl-ai-btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.hl-ai-btn:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+.hl-ai-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.hl-save-btn {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.hl-save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(47, 109, 79, 0.35);
+}
+.hl-save-btn:active {
+  transform: translateY(0);
+}
+
+.hl-link-btn {
+  transition: opacity 0.12s ease;
+}
+.hl-link-btn:hover {
+  opacity: 0.7;
+}
+
+/* ---------- habit rows ---------- */
+
+.hl-habit-row {
+  transition: background 0.15s ease;
+}
+.hl-habit-row:hover {
+  background: rgba(31, 42, 36, 0.03);
+}
+
+/* ---------- scrollbar ---------- */
+
+.hl-scrollx::-webkit-scrollbar {
+  height: 6px;
+}
+.hl-scrollx::-webkit-scrollbar-thumb {
+  background: var(--slate);
+  border-radius: 3px;
+}
+
+/* ---------- focus accessibility ---------- */
+
+.hl-root button:focus-visible,
+.hl-root input:focus-visible,
+.hl-root select:focus-visible {
+  outline: 2px solid var(--moss);
+  outline-offset: 2px;
+}

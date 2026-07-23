@@ -14,6 +14,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import "./HabitLogbook.css";
 
 // ---------- helpers ----------
 const HABITS = [
@@ -351,34 +352,7 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
 
   return (
     <div style={styles.page}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
-        * { box-sizing: border-box; }
-        .hl-root { font-family: 'Inter', sans-serif; }
-        .hl-mono { font-family: 'JetBrains Mono', monospace; }
-        .hl-checkbox { appearance: none; width: 22px; height: 22px; border: 2px solid var(--ink); border-radius: 3px; cursor: pointer; position: relative; background: transparent; flex-shrink: 0; }
-        .hl-checkbox:checked { background: var(--moss); border-color: var(--moss); }
-        .hl-checkbox:checked::after { content: '✓'; position: absolute; top: -3px; left: 3px; color: var(--paper); font-size: 15px; font-weight: 700; }
-        .hl-checkbox-sm { appearance: none; width: 15px; height: 15px; border: 1.5px solid var(--slate); border-radius: 3px; cursor: pointer; position: relative; background: var(--paper); flex-shrink: 0; }
-        .hl-checkbox-sm:checked { background: var(--moss); border-color: var(--moss); }
-        .hl-checkbox-sm:checked::after { content: '✓'; position: absolute; top: -3px; left: 1px; color: var(--paper); font-size: 11px; font-weight: 700; }
-        .hl-num-input::-webkit-outer-spin-button, .hl-num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .hl-num-input { -moz-appearance: textfield; }
-        .hl-num-input:focus { outline: none; border-color: var(--hcolor, var(--slate)); background: var(--paper); }
-        .hl-num-input:hover { border-color: var(--hcolor, var(--slate)); }
-        .hl-stepper-btn { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--hcolor, var(--slate)); background: var(--paper); color: var(--hcolor, var(--ink)); font-family: 'JetBrains Mono', monospace; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s ease; }
-        .hl-stepper-btn:hover { background: var(--hcolor, var(--ink)); color: var(--paper); border-color: var(--hcolor, var(--ink)); }
-        .hl-day-pill { cursor: pointer; border: none; background: transparent; font-family: 'JetBrains Mono', monospace; padding: 6px 10px; border-radius: 20px; font-size: 12px; color: var(--slate); transition: all .15s ease; white-space: nowrap; }
-        .hl-day-pill.active { background: var(--ink); color: var(--paper); }
-        .hl-ai-btn { background: var(--amber); color: var(--ink); border: none; padding: 12px 22px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 0.03em; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; box-shadow: 3px 3px 0 var(--ink); }
-        .hl-ai-btn:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
-        .hl-ai-btn:active:not(:disabled) { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
-        .hl-ai-btn:disabled { opacity: 0.6; cursor: default; }
-        .hl-scrollx::-webkit-scrollbar { height: 6px; }
-        .hl-scrollx::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 3px; }
-      `}</style>
-
-      <div className="hl-root" style={{ "--ink": "#1F2A24", "--paper": "#EEF0E6", "--moss": "#2F6D4F", "--amber": "#C98A2B", "--rust": "#B24C33", "--slate": "#8B9184" }}>
+      <div className="hl-root">
         {/* Header / masthead */}
         <div style={styles.masthead}>
           <div className="hl-mono" style={styles.eyebrow}>FIELD LOG — PERSONAL HABITS</div>
@@ -413,7 +387,7 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
         </div>
 
         {/* Entry ledger */}
-        <div style={styles.card}>
+        <div className="hl-card" style={styles.card}>
           <div style={styles.cardHeaderRow}>
             <div className="hl-mono" style={styles.cardHeader}>
               Entry — {fmtDay(selectedDate)} {isToday ? "(today)" : ""}
@@ -422,14 +396,14 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
               <div className="hl-mono" style={styles.saveIndicator}>
                 {saveState === "saving" ? "saving…" : saveState === "saved" ? "saved ✓" : ""}
               </div>
-              <button className="hl-mono" style={styles.saveBtn} onClick={saveNow}>
+              <button className="hl-mono hl-save-btn" style={styles.saveBtn} onClick={saveNow}>
                 SAVE
               </button>
             </div>
           </div>
 
           {HABITS.map((h) => (
-            <div key={h.key} style={styles.habitRow}>
+            <div key={h.key} className="hl-habit-row" style={styles.habitRow}>
               <div className="hl-mono" style={{ ...styles.habitDot, color: h.color }} title={`${streaks[h.key]}-day streak`}>
                 {streaks[h.key]}
               </div>
@@ -513,7 +487,7 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
         </div>
 
         {/* Trend chart */}
-        <div style={styles.card}>
+        <div className="hl-card" style={styles.card}>
           <div style={styles.cardHeaderRow}>
             <div className="hl-mono" style={styles.cardHeader}>14-Day Trend</div>
             <div style={styles.chartTypeGroup}>
@@ -561,7 +535,7 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
         </div>
 
         {/* Target hit rate */}
-        <div style={styles.card}>
+        <div className="hl-card" style={styles.card}>
           <div style={styles.cardHeaderRow}>
             <div className="hl-mono" style={styles.cardHeader}>Target Hit Rate — Last 14 Days</div>
             <select
@@ -606,7 +580,7 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
         </div>
 
         {/* AI Insights */}
-        <div style={styles.card}>
+        <div className="hl-card" style={styles.card}>
           <div style={styles.cardHeaderRow}>
             <div className="hl-mono" style={styles.cardHeader}>Field Report — AI Insights</div>
             <button className="hl-ai-btn" onClick={requestInsights} disabled={insightsLoading}>
@@ -650,11 +624,11 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
         <div className="hl-mono" style={styles.footer}>
           data stored privately on this device — {Object.keys(log).length} days logged
           {" · "}
-          <button className="hl-mono" style={styles.exportBtn} onClick={exportData}>
+          <button className="hl-mono hl-link-btn" style={styles.exportBtn} onClick={exportData}>
             export data
           </button>
           {" · "}
-          <button className="hl-mono" style={styles.exportBtn} onClick={triggerImport}>
+          <button className="hl-mono hl-link-btn" style={styles.exportBtn} onClick={triggerImport}>
             import data
           </button>
           <input
@@ -665,7 +639,7 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
             style={{ display: "none" }}
           />
           {" · "}
-          <button className="hl-mono" style={styles.resetBtn} onClick={resetData}>
+          <button className="hl-mono hl-link-btn" style={styles.resetBtn} onClick={resetData}>
             {resetArmed ? "click again to confirm" : "reset data"}
           </button>
           {importMessage && (
