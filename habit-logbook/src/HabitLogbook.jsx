@@ -23,8 +23,9 @@ const HABITS = [
   { key: "sleep", label: "Sleep", unit: "hrs", type: "count", target: 8, step: 0.5, color: "#7C5CBF", page: "today" },
   { key: "reading", label: "Reading", unit: "min", type: "count", target: 30, step: 5, color: "#C98A2B", page: "today" },
   { key: "coding", label: "Coding", unit: "min", type: "count", target: 60, step: 5, color: "#B24C33", page: "today" },
-  { key: "deliveries", label: "Deliveries", unit: "$", type: "count", target: 50, step: 1, color: "#5C7A99", goal: "max", page: "expenses" },
-  { key: "jobApps", label: "Job Apps", unit: "applications", type: "count", target: 5, step: 1, color: "#2E8B8B", page: "today" },
+  { key: "deliveries", label: "Deliveries", unit: "$", type: "count", target: 75, step: 1, color: "#5C7A99", page: "income" },
+  { key: "expenses", label: "Expenses", unit: "$", type: "count", step: 1, color: "#8B3A3A", page: "expenses" },
+  { key: "jobApps", label: "Job Apps", unit: "applications", type: "count", target: 10, step: 1, color: "#2E8B8B", page: "today" },
   { key: "creatine", label: "Creatine", unit: "dose", type: "bool", color: "#9C6B30", page: "today" },
   { key: "proteinShake", label: "Protein Shake", unit: "shake", type: "bool", color: "#C2577D", page: "today" },
 ];
@@ -33,6 +34,7 @@ const PAGES = [
   { key: "today", label: "Today" },
   { key: "gym", label: "Gym" },
   { key: "meals", label: "Meals" },
+  { key: "income", label: "Income" },
   { key: "expenses", label: "Expenses" },
 ];
 
@@ -55,6 +57,7 @@ const TREND_SERIES = [
   { key: "Reading", color: "#C98A2B" },
   { key: "Coding", color: "#B24C33" },
   { key: "Deliveries", color: "#5C7A99" },
+  { key: "Expenses", color: "#8B3A3A" },
   { key: "Job Apps", color: "#2E8B8B" },
 ];
 
@@ -114,6 +117,7 @@ function emptyEntry(date) {
     reading: 0,
     coding: 0,
     deliveries: 0,
+    expenses: 0,
     jobApps: 0,
     creatine: false,
     proteinShake: false,
@@ -127,6 +131,7 @@ function emptyEntry(date) {
 
 function isHit(h, e) {
   if (h.type === "bool") return !!e[h.key];
+  if (h.target == null) return true;
   return h.goal === "max" ? (e[h.key] || 0) <= h.target : (e[h.key] || 0) >= h.target;
 }
 
@@ -163,7 +168,11 @@ export default function HabitLogbook() {
   const importInputRef = useRef(null);
   const [chartType, setChartType] = useState("line"); // line | bar
   const [hitRateHabitKey, setHitRateHabitKey] = useState(HABITS[0].key);
-  const [page, setPage] = useState("today"); // today | gym | meals | expenses
+  const [page, setPage] = useState("today"); // today | gym | meals | income
+  const [analyzingSlot, setAnalyzingSlot] = useState(null); // which meal slot is being photo-analyzed
+  const [photoMessage, setPhotoMessage] = useState(null);
+  const photoInputRef = useRef(null);
+  const photoTargetSlot = useRef(null);
 
   const entry = log[selectedDate] || emptyEntry(selectedDate);
 
@@ -247,6 +256,65 @@ export default function HabitLogbook() {
     reader.readAsText(file);
   };
 
+  const triggerPhoto = (slotKey) => {
+    photoTargetSlot.current = slotKey;
+    photoInputRef.current?.click();
+  };
+
+  const handlePhotoSelected = (ev) => {
+    const file = ev.target.files?.[0];
+    const slotKey = photoTargetSlot.current;
+    ev.target.value = ""; // allow re-selecting the same photo next time
+    if (!file || !slotKey) return;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = String(reader.result).split(",")[1] || "";
+      setAnalyzingSlot(slotKey);
+      setPhotoMessage(null);
+      try {
+        const response = await fetch("/api/insights", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-sonnet-5",
+            max_tokens: 150,
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "image", source: { type: "base64", media_type: file.type || "image/jpeg", data: base64 } },
+                  {
+                    type: "text",
+                    text: "In under 12 words, list the food items visible in this photo as a short comma-separated phrase. Just the food, no commentary, no markdown.",
+                  },
+                ],
+              },
+            ],
+          }),
+        });
+        const data = await response.json();
+        if (data.error) throw new Error(typeof data.error === "string" ? data.error : data.error.message);
+        const description = (data.content || [])
+          .filter((b) => b.type === "text")
+          .map((b) => b.text)
+          .join(" ")
+          .trim();
+        if (!description) throw new Error("couldn't read that photo");
+
+        const current = (log[selectedDate] || emptyEntry(selectedDate))[slotKey] || "";
+        const nextText = current ? `${current}, ${description}` : description;
+        updateEntry({ [slotKey]: nextText });
+      } catch (e) {
+        setPhotoMessage(e.message || "Couldn't analyze that photo. Try again.");
+        setTimeout(() => setPhotoMessage(null), 4000);
+      } finally {
+        setAnalyzingSlot(null);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   // last 14 days, oldest first
   const last14 = useMemo(() => {
     const days = [];
@@ -274,6 +342,7 @@ export default function HabitLogbook() {
         Reading: e.reading,
         Coding: e.coding,
         Deliveries: e.deliveries,
+        Expenses: e.expenses,
         "Job Apps": e.jobApps,
         Gym: e.gym ? 1 : 0,
       })),
@@ -323,14 +392,15 @@ export default function HabitLogbook() {
         sleep_hours: e.sleep,
         reading_min: e.reading,
         coding_min: e.coding,
-        delivery_spend_usd: e.deliveries,
+        delivery_income_usd: e.deliveries,
+        expenses_usd: e.expenses,
         job_applications: e.jobApps,
         creatine: e.creatine,
         protein_shake: e.proteinShake,
       }));
 
       const system = `You are a calm, precise personal-habits analyst reviewing a 14-day log.
-Targets: water 1 bottle (2.5L)/day, sleep 8 hrs/night, reading 30 min/day, coding 60 min/day, gym is a yes/no session (with a workout type: push/pull/legs/rest day), deliveries should stay under $50/day, job applications target is 5/day, creatine and protein shake are yes/no daily supplements.
+Targets: water 1 bottle (2.5L)/day, sleep 8 hrs/night, reading 30 min/day, coding 60 min/day, gym is a yes/no session (with a workout type: push/pull/legs/rest day), deliveries are daily income with a target of at least $75/day, expenses are daily spending with no fixed target (just track it), job applications target is 10/day, creatine and protein shake are yes/no daily supplements.
 Respond with ONLY valid JSON, no markdown fences, no preamble, matching exactly this shape:
 {
   "summary": "one or two sentence overall read on the fortnight",
@@ -439,10 +509,17 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
                   <input
                     type="text"
                     className="hl-mono hl-meal-input"
-                    placeholder="what did you eat?"
+                    placeholder="what did you eat? (tap the mic on your keyboard to speak it)"
                     value={entry[slot.key] || ""}
                     onChange={(ev) => updateEntry({ [slot.key]: ev.target.value })}
                   />
+                  <button
+                    className="hl-mono hl-photo-btn"
+                    onClick={() => triggerPhoto(slot.key)}
+                    disabled={analyzingSlot === slot.key}
+                  >
+                    {analyzingSlot === slot.key ? "…" : "PHOTO"}
+                  </button>
                 </div>
               ))}
               <div className="hl-habit-row" style={styles.mealRow}>
@@ -459,8 +536,19 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
                   ))}
                 </select>
               </div>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handlePhotoSelected}
+                style={{ display: "none" }}
+              />
+              {photoMessage && (
+                <div className="hl-mono" style={styles.errorText}>{photoMessage}</div>
+              )}
               <div className="hl-mono" style={styles.emptyState}>
-                Photo and voice logging are coming later — for now just type what you ate.
+                Tap PHOTO to snap a meal and have it described automatically, or use your keyboard's dictation (mic icon) to speak it instead of typing.
               </div>
             </>
           ) : (
@@ -538,10 +626,12 @@ Keep every string under 140 characters. Be specific to the numbers given, not ge
                   >
                     +
                   </button>
-                  <div style={styles.targetTag} className="hl-mono">
-                    {h.goal === "max" ? "under " : "/ "}
-                    {h.unit === "$" ? `$${h.target}` : h.target}
-                  </div>
+                  {h.target != null && (
+                    <div style={styles.targetTag} className="hl-mono">
+                      {h.goal === "max" ? "under " : "/ "}
+                      {h.unit === "$" ? `$${h.target}` : h.target}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
